@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://vjs.zencdn.net/7.15.4/video-js.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <title>Transmissões Ao Vivo</title>
+    <style>
+        #video-container {
+            display: none; /* Iniciar com o modal oculto */
+        }
+        .vjs-default-skin {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <header class="bg-blue-800 text-white py-4 shadow-md">
+        <div class="container mx-auto text-center">
+            <h1 class="text-3xl font-bold">Transmissões Ao Vivo</h1>
+        </div>
+    </header>
+    <main class="py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="gamesContainer">
+                <!-- Os cartões de jogos serão inseridos aqui -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Container do player de vídeo -->
+    <div id="video-container" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div class="relative w-full h-full bg-black">
+            <div class="absolute top-2 right-2">
+                <button onclick="closeStream()" class="text-white bg-red-600 rounded-full px-2 py-1">X</button>
+            </div>
+            <video id="liveStreamPlayer" class="vjs-default-skin" controls preload="auto" width="100%" height="100%"></video>
+        </div>
+    </div>
+
+    <script src="https://vjs.zencdn.net/7.15.4/video.min.js"></script>
+
+    <script>
+                const games = [
+            {
+                
+                duracao: 90
+            },
+            {
+                
+                duracao: 90
+            },
+
+            {
+                
+                duracao: 90
+            },
+        ];
+
+        const gamesContainer = document.getElementById('gamesContainer');
+
+        games.forEach(game => {
+            const gameCard = document.createElement('div');
+            gameCard.classList.add('bg-white', 'rounded-lg', 'shadow-lg', 'overflow-hidden');
+            gameCard.setAttribute('data-duration', game.duration); // Adiciona a duração como um atributo
+            gameCard.setAttribute('data-start-time', Date.now()); // Adiciona o tempo de início
+
+            gameCard.innerHTML = `
+                <div class="p-4 border-b border-gray-200">
+                    <div class="flex items-center mb-4">
+                        <img src="${game.teamLogos[0]}" alt="${game.teams[0]}" class="w-12 h-12 object-cover rounded-full mr-4">
+                        <span class="text-xl font-semibold">${game.teams[0]}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <img src="${game.teamLogos[1]}" alt="${game.teams[1]}" class="w-12 h-12 object-cover rounded-full mr-4">
+                        <span class="text-xl font-semibold">${game.teams[1]}</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                    <span class="text-gray-600">${game.league}</span>
+                    <img src="${game.leagueLogo}" alt="${game.league}" class="w-12 h-12">
+                </div>
+                <div class="flex items-center p-4">
+                    <button onclick="openStream('${game.streamUrl}', this)" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition transform hover:scale-105">Assistir Partida</button>
+                </div>
+            `;
+
+            gamesContainer.appendChild(gameCard);
+        });
+
+        function openStream(url, button) {
+            const videoContainer = document.getElementById('video-container');
+            const player = videojs('liveStreamPlayer');
+
+            // Atualize o src do player e exiba o modal
+            player.src({ src: url, type: 'application/x-mpegURL' });
+            player.play();
+            videoContainer.style.display = 'flex';
+
+            // Atualize a aparência do botão para indicar que o stream está ativo
+            button.classList.add('bg-gray-600');
+            button.classList.remove('bg-blue-600');
+            button.disabled = true;
+
+            // Adicione um atributo de identificação para o botão, para que possa ser reativado depois
+            button.setAttribute('data-stream-active', 'true');
+        }
+
+        function closeStream() {
+            const videoContainer = document.getElementById('video-container');
+            const player = videojs('liveStreamPlayer');
+            
+            // Pause o vídeo e limpe o src
+            player.pause();
+            player.src({});
+            videoContainer.style.display = 'none';
+
+            // Reative os botões de assistir partidas
+            const buttons = document.querySelectorAll('button[data-stream-active="true"]');
+            buttons.forEach(button => {
+                button.classList.remove('bg-gray-600');
+                button.classList.add('bg-blue-600');
+                button.disabled = false;
+                button.removeAttribute('data-stream-active'); // Remove o atributo para garantir que o botão possa ser reusado
+            });
+        }
+
+        function checkGameRemoval() {
+            const currentTime = Date.now();
+            const cards = document.querySelectorAll('#gamesContainer > div');
+
+            cards.forEach(card => {
+                const startTime = parseInt(card.getAttribute('data-start-time'));
+                const duration = parseInt(card.getAttribute('data-duration'));
+                const endTime = startTime + duration * 60 * 1000; // Convertendo minutos para milissegundos
+
+                if (currentTime > endTime) {
+                    card.remove();
+                }
+            });
+        }
+
+        setInterval(checkGameRemoval, 60 * 1000);
+    </script>
+</body>
+</html>

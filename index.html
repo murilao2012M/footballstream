@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://vjs.zencdn.net/7.15.4/video-js.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <title>SportsStream</title>
+    <script>
+        window.onload = function() {
+            document.getElementById('login').classList.add('hidden');
+            document.getElementById('registration').classList.remove('hidden');
+        };
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Verificar dados de login
+            const storedUsername = localStorage.getItem('username');
+            const storedPassword = localStorage.getItem('password');
+
+            if (username === storedUsername && password === storedPassword) {
+                window.location.href = "conteudo.html";
+            } else {
+                alert('Usuário ou senha incorretos!');
+            }
+        }
+
+        function handleRegistration(event) {
+            event.preventDefault();
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            
+            // Validação de e-mail e senha
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.*[0-9])[A-Za-z\d!@#$%^&*]{8,}$/;
+
+            if (!emailRegex.test(email)) {
+                document.getElementById('emailError').classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('emailError').classList.add('hidden');
+            }
+
+            if (!passwordRegex.test(password)) {
+                document.getElementById('passwordError').classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('passwordError').classList.add('hidden');
+            }
+
+            // Armazenar dados de cadastro no localStorage
+            localStorage.setItem('username', email);
+            localStorage.setItem('password', password);
+
+            alert('Cadastro bem-sucedido!');
+            document.getElementById('login').classList.remove('hidden');
+            document.getElementById('registration').classList.add('hidden');
+        }
+
+        function showRegistration() {
+            document.getElementById('login').classList.add('hidden');
+            document.getElementById('registration').classList.remove('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('login').classList.remove('hidden');
+            document.getElementById('registration').classList.add('hidden');
+        }
+    </script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen background-image">
+
+    <!-- Tela Inicial -->
+    <div id="telainicial" class="text-center bg-blue-600 text-white p-10 rounded-lg shadow-lg max-w-md w-full hidden">
+        <h1 class="text-4xl font-bold mb-4">SportsStream</h1>
+        <p class="text-lg">O melhor do Streaming, com apenas um clique</p>
+    </div>
+
+    <!-- Página de Login -->
+    <div id="login" class="login hidden bg-white p-8 rounded-lg shadow-lg max-w-sm w-full z-10">
+        <h2 class="text-2xl font-semibold mb-6 text-center">Login</h2>
+        <form onsubmit="handleLogin(event)">
+            <div class="mb-4">
+                <label for="username" class="block text-sm font-medium text-gray-700">Usuário</label>
+                <input type="text" id="username" name="username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div class="mb-6">
+                <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
+                <input type="password" id="password" name="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-transform transform hover:scale-105">Entrar</button>
+            <div class="mt-4 text-center">
+                <button type="button" onclick="showRegistration()" class="text-blue-600 hover:underline">Criar Conta</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Página de Cadastro -->
+    <div id="registration" class="registration bg-white p-8 rounded-lg shadow-lg max-w-sm w-full z-10">
+        <h2 class="text-2xl font-semibold mb-6 text-center">Cadastro</h2>
+        <form onsubmit="handleRegistration(event)">
+            <div class="mb-4">
+                <label for="regEmail" class="block text-sm font-medium text-gray-700">E-mail</label>
+                <input type="email" id="regEmail" name="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <p id="emailError" class="text-red-500 text-sm hidden">E-mail inválido.</p>
+            </div>
+            <div class="mb-6">
+                <label for="regPassword" class="block text-sm font-medium text-gray-700">Senha</label>
+                <input type="password" id="regPassword" name="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <p id="passwordError" class="text-red-500 text-sm hidden">A senha deve ter pelo menos 8 dígitos, uma letra maiúscula e um caractere especial.</p>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-transform transform hover:scale-105">Cadastrar</button>
+            <div class="mt-4 text-center">
+                <button type="button" onclick="showLogin()" class="text-blue-600 hover:underline">Já tenho uma conta</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

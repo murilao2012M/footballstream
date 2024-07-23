@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transmissão ao Vivo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #000;
+        }
+        video {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <video id="video" controls autoplay></video>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+        if (Hls.isSupported()) {
+            var video = document.getElementById('video');
+            var urlParams = new URLSearchParams(window.location.search);
+            var streamUrl = urlParams.get('url');
+
+            if (streamUrl) {
+                var hls = new Hls();
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play();
+                });
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    if (data.fatal) {
+                        switch(data.fatal) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                console.error('Network error.');
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                console.error('Media error.');
+                                break;
+                            case Hls.ErrorTypes.OTHER_ERROR:
+                                console.error('Other error.');
+                                break;
+                        }
+                    }
+                });
+            } else {
+                console.error('URL do stream não fornecida.');
+            }
+        } else {
+            console.error('HLS.js não é suportado neste navegador.');
+        }
+    </script>
+</body>
+</html>
